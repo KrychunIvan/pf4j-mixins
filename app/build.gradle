@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'pf4j-mixin-interaction'
+version '0.1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://stianloader.org/maven/'
+    }
+}
+
+compileJava {
+    options.encoding = "UTF-8"
+    outputs.upToDateWhen { false }
+    options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+ext {
+    micromixinVersion = '0.6.3-a20240808'
+}
+
+dependencies {
+    compile 'org.pf4j:pf4j:3.5.0'
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
+}
+
+//Application
+mainClassName = "ua.wildwinner.Application"
+
+List<Task> getRelease(String... prjNames) {
+    List temp = new ArrayList()
+    prjNames.each {
+        temp.add(project(it).getTasks().getByName("release"))
+    }
+    return temp
+}
+
+gradle.projectsEvaluated({
+    run.dependsOn += getRelease(
+            ':plugin'
+    )
+})

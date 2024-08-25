@@ -7,8 +7,39 @@ version '0.1'
 
 sourceCompatibility = 1.8
 
-repositories {
-    mavenCentral()
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        repositories {
+            mavenCentral()
+        }
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    compileJava {
+        options.encoding = 'UTF-8'
+        outputs.upToDateWhen {false}
+    }
+}
+// plugin location
+ext.pluginsDir = rootProject.buildDir.path + '/plugins'
+
+configure(project(':plugin')) {
+
+    dependencies{
+        annotationProcessor('org.pf4j:pf4j:3.5.0')
+    }
+
+    def release_dir = "$rootProject.projectDir/app/plugins/"
+
+    task release(type: Copy, dependsOn: jar) {
+        outputs.upToDateWhen { false }
+        from "${buildDir}/libs"
+        into release_dir
+    }
 }
 
 dependencies {

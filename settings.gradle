@@ -1,2 +1,4 @@
 rootProject.name = 'pf4j-mixin-interaction'
+include 'app'
+include 'plugin'
 
