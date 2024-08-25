@@ -11,6 +11,8 @@ import java.util.List;
 public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+    private static MixinService mixinService = new MixinService();
+
     public static void main(String[] args) {
         PluginManager pluginManager = new DefaultPluginManager();
         pluginManager.loadPlugins();
@@ -21,6 +23,10 @@ public class Application {
             log.info(String.format("Extensions added by plugin '%s':", pluginId));
             List<SayHello> extensions = pluginManager.getExtensions(SayHello.class);
             extensions.forEach(extension -> log.info("Plugin extension say - {}", extension.hello()));
+            List<MixinExtension> mixinProviders = pluginManager.getExtensions(MixinExtension.class);
+            mixinProviders.forEach(mixinProvider -> mixinService.registerMixin(mixinProvider.configProvider()));
+            mixinService.transform(Target.class);
+            new Target().hi();
         }
         pluginManager.stopPlugins();
     }

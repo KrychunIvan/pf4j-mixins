@@ -1,0 +1,30 @@
+package ua.wildwinner;
+
+import org.objectweb.asm.tree.ClassNode;
+import org.stianloader.micromixin.transform.api.BytecodeProvider;
+import org.stianloader.micromixin.transform.api.supertypes.ASMClassWrapperProvider;
+
+import java.util.Map;
+
+public class MapBytecodeProvider<M> extends ASMClassWrapperProvider implements BytecodeProvider<M> {
+
+    private final Map<String, ClassNode> nodes;
+
+    public MapBytecodeProvider(Map<String, ClassNode> nodes) {
+        this.nodes = nodes;
+    }
+
+    @Override
+    public ClassNode getClassNode(M modularityAttachment, String internalName) throws ClassNotFoundException {
+        ClassNode node = this.nodes.get(internalName);
+        if (node == null) {
+            throw new ClassNotFoundException("Class '" + internalName + "' could not be located for attachment '" + modularityAttachment + "'.");
+        }
+        return node;
+    }
+
+    @Override
+    public ClassNode getNode(String name) {
+        return this.nodes.get(name);
+    }
+}
