@@ -1,18 +1,19 @@
 package ua.wildwinner;
 
+import java.util.List;
+
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.List;
+import ua.wildwinner.boot.MixinClassLoader;
 
 public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-    private static MixinService mixinService = new MixinService();
+    private static MixinService mixinService = ((MixinClassLoader) Application.class.getClassLoader()).getMixinService();
 
     public static void main(String[] args) {
         PluginManager pluginManager = new DefaultPluginManager();
@@ -29,16 +30,16 @@ public class Application {
                 mixinProvider.registerClassNode(mixinService::addNode);
                 mixinService.registerMixin(mixinProvider.configProvider());
             });
-            try {
-                Class<?> transformed = mixinService.transform(Target.class);
-                Object instance = transformed.getConstructor().newInstance();
-                Method method = transformed.getMethod("hi");
-                String result = (String) method.invoke(instance);
-                log.info("Transformed call {}", result);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
+
+        try {
+            Target instance = new Target();
+            String result = instance.hi();
+            log.info("Transformed call {}", result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         pluginManager.stopPlugins();
     }
 }

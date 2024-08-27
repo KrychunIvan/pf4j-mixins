@@ -20,7 +20,7 @@ dependencies {
 }
 
 //Application
-mainClassName = "ua.wildwinner.Application"
+mainClassName = "ua.wildwinner.boot.ApplicationBootstrap"
 
 List<Task> getRelease(String... prjNames) {
     List temp = new ArrayList()

@@ -1,18 +1,14 @@
 package ua.wildwinner;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectweb.asm.tree.ClassNode;
 import org.stianloader.micromixin.transform.api.MixinConfig;
 import org.stianloader.micromixin.transform.api.MixinTransformer;
 import org.stianloader.micromixin.transform.api.supertypes.ClassWrapperPool;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 public class MixinService {
-    private final CustomClassLoader customClassLoader = new CustomClassLoader(getClass().getClassLoader());
     private final Map<String, ClassNode> nodes = new HashMap<>();
     private MixinTransformer<Void> transformer;
 
@@ -30,24 +26,7 @@ public class MixinService {
         transformer.addMixin(null, mixinConfig);
     }
 
-    public Class<?> transform(Class<?> clazz) throws IOException {
-        ClassNode classNode = getClassNode(clazz);
+    public void transform(ClassNode classNode) {
         transformer.transform(classNode);
-        byte[] classBytesFromClassNode = getClassBytesFromClassNode(classNode);
-        return customClassLoader.defineClass(clazz.getName(), classBytesFromClassNode);
-    }
-
-    private ClassNode getClassNode(Class<?> targetClass) throws IOException {
-        ClassReader classReader = new ClassReader(targetClass.getName());
-        ClassNode classNode = new ClassNode();
-        classReader.accept(classNode, 0);
-
-        return classNode;
-    }
-
-    private byte[] getClassBytesFromClassNode(ClassNode classNode) {
-        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        classNode.accept(classWriter);
-        return classWriter.toByteArray();
     }
 }
