@@ -6,6 +6,7 @@ import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class Application {
@@ -24,9 +25,19 @@ public class Application {
             List<SayHello> extensions = pluginManager.getExtensions(SayHello.class);
             extensions.forEach(extension -> log.info("Plugin extension say - {}", extension.hello()));
             List<MixinExtension> mixinProviders = pluginManager.getExtensions(MixinExtension.class);
-            mixinProviders.forEach(mixinProvider -> mixinService.registerMixin(mixinProvider.configProvider()));
-            mixinService.transform(Target.class);
-            new Target().hi();
+            mixinProviders.forEach(mixinProvider -> {
+                mixinProvider.registerClassNode(mixinService::addNode);
+                mixinService.registerMixin(mixinProvider.configProvider());
+            });
+            try {
+                Class<?> transformed = mixinService.transform(Target.class);
+                Object instance = transformed.getConstructor().newInstance();
+                Method method = transformed.getMethod("hi");
+                String result = (String) method.invoke(instance);
+                log.info("Transformed call {}", result);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         pluginManager.stopPlugins();
     }

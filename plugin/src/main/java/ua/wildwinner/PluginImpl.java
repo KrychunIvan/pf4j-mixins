@@ -1,5 +1,8 @@
 package ua.wildwinner;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.ClassNode;
 import org.pf4j.Extension;
 import org.pf4j.ExtensionPoint;
 import org.pf4j.Plugin;
@@ -12,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class PluginImpl extends Plugin {
@@ -52,8 +56,35 @@ public class PluginImpl extends Plugin {
         }
     }
 
+
+    public static void registerClassNode(Class<?> clazz, BiConsumer<String, ClassNode> addClassNode)
+            throws IOException {
+
+        String className = clazz.getName().replace('.', '/');
+        try (InputStream inputStream = clazz.getClassLoader().getResourceAsStream(className + ".class")) {
+            if (inputStream == null) {
+                throw new IOException("Class not found: " + className);
+            }
+
+            ClassReader classReader = new ClassReader(inputStream);
+            ClassNode classNode = new ClassNode(Opcodes.ASM9);
+            classReader.accept(classNode, 0);
+
+            addClassNode.accept(className, classNode);
+        }
+    }
+
     @Extension
     public static class MixinProvider implements MixinExtension, ExtensionPoint {
+
+        @Override
+        public void registerClassNode(BiConsumer<String, ClassNode> addClassNode) {
+            try {
+                PluginImpl.registerClassNode(TargetMixin.class, addClassNode);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         @Override
         public MixinConfig configProvider() {
