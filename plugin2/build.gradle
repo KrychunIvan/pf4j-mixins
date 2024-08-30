@@ -6,13 +6,13 @@ dependencies {
 
 def dep = project.configurations.compile.collect()
 dep.removeAll(project(':app').configurations.compile.collect())
-dep.remove(file(project(':app').buildDir.absolutePath+"/libs/app.jar"))
+dep.remove(file(project(':app').buildDir.absolutePath + "/libs/app.jar"))
 
 jar {
     manifest {
         attributes 'Manifest-Version': '1.0'
-        attributes 'Plugin-Class': 'ua.wildwinner.PluginImpl'
-        attributes 'Plugin-Id': 'test-plugin'
+        attributes 'Plugin-Class': 'ua.wildwinner.plugin2.PluginImpl'
+        attributes 'Plugin-Id': 'test-plugin2'
         attributes 'Plugin-Version': '0.0.1'
         attributes 'Plugin-Provider': 'APP'
     }

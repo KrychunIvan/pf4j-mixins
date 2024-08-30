@@ -68,10 +68,6 @@ public class MixinClassLoader extends URLClassLoader {
         this.mixinService = mixinService;
     }
 
-    public MixinService getMixinService() {
-        return this.mixinService;
-    }
-
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (this.getClassLoadingLock(name)) {
