@@ -37,17 +37,18 @@ subprojects {
 // plugin location
 ext.pluginsDir = rootProject.buildDir.path + '/plugins'
 
-configure(project(':plugin')) {
+subprojects { subproject ->
+    if (subproject.name in ['plugin1', 'plugin2']) {
+        dependencies {
+            annotationProcessor 'org.pf4j:pf4j:3.5.0'
+        }
 
-    dependencies{
-        annotationProcessor('org.pf4j:pf4j:3.5.0')
-    }
+        def release_dir = "$rootProject.projectDir/app/plugins/"
 
-    def release_dir = "$rootProject.projectDir/app/plugins/"
-
-    task release(type: Copy, dependsOn: jar) {
-        outputs.upToDateWhen { false }
-        from "${buildDir}/libs"
-        into release_dir
+        task release(type: Copy, dependsOn: jar) {
+            outputs.upToDateWhen { false }
+            from "${buildDir}/libs"
+            into release_dir
+        }
     }
 }
