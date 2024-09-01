@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+dependencies {
+    compileOnly project(':app')
+}
+
+def dep = project.configurations.compile.collect()
+dep.removeAll(project(':app').configurations.compile.collect())
+dep.remove(file(project(':app').buildDir.absolutePath + "/libs/app.jar"))
+
+jar {
+    manifest {
+        attributes 'Manifest-Version': '1.0'
+        attributes 'Plugin-Class': 'ua.wildwinner.CarrierPlugin'
+        attributes 'Plugin-Id': 'carrier-plugin'
+        attributes 'Plugin-Version': '0.0.1'
+        attributes 'Plugin-Provider': 'APP'
+    }
+
+    from {
+        dep.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

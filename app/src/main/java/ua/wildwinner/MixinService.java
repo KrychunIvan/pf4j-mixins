@@ -1,7 +1,9 @@
 package ua.wildwinner;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.objectweb.asm.tree.ClassNode;
 import org.stianloader.micromixin.transform.api.MixinConfig;
@@ -11,6 +13,7 @@ import org.stianloader.micromixin.transform.api.supertypes.ClassWrapperPool;
 public class MixinService {
     private final Map<String, ClassNode> nodes = new HashMap<>();
     private MixinTransformer<Void> transformer;
+    private Map<String, Supplier<URL>> map = new HashMap<>();
 
     public MixinService() {
         MapBytecodeProvider<Void> bytecodeProvider = new MapBytecodeProvider<>(nodes);
@@ -28,5 +31,14 @@ public class MixinService {
 
     public void transform(ClassNode classNode) {
         transformer.transform(classNode);
+    }
+
+    public void addSourceUrlProvider(String className, Supplier<URL> urlSupplier) {
+        map.put(className, urlSupplier);
+    }
+
+    public URL getUrl(String cl) {
+        Supplier<URL> urlSupplier = map.get(cl);
+        return urlSupplier == null ? null : urlSupplier.get();
     }
 }

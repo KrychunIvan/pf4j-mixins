@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "minVersion": "0.7.5",
+  "package": "ua.wildwinner",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "DoSomeThingUsefulMixin"
+  ]
+}

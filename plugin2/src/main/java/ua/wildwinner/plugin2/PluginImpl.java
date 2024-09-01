@@ -6,8 +6,8 @@ import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ua.wildwinner.MixinExtension;
-import ua.wildwinner.SayHello;
+import ua.wildwinner.extensions.MixinExtension;
+import ua.wildwinner.extensions.SayHello;
 
 public class PluginImpl extends Plugin {
     private static final Logger log = LoggerFactory.getLogger(PluginImpl.class);
@@ -40,7 +40,7 @@ public class PluginImpl extends Plugin {
 
         public MixinProviderPlugin2() {
             super(PluginImpl.class.getClassLoader());
-            registerClassNode(TargetMixin.class);
+            registerMixinClassNode(TargetMixin.class);
         }
     }
 }

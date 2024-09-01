@@ -1,30 +1,41 @@
 package ua.wildwinner.boot;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
+import ua.wildwinner.MixinService;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.ClassNode;
-
-import ua.wildwinner.MixinService;
 
 public class MixinClassLoader extends URLClassLoader {
 
     private static final String[] PROHIBITED_PREFIXES = {
         "ua.wildwinner.boot.",
         "ua.wildwinner.MixinService",
+        "ua.wildwinner.extensions.",
         "org.objectweb.asm.",
         "org.json.",
         "org.stianloader.micromixin.transform.",
-        "org.slf4j."
+        "org.slf4j.",
+        "org.pf4j."
     };
 
     static {
         ClassLoader.registerAsParallelCapable();
+    }
+
+    public void addFile(File file) {
+        try {
+            addURL(file.getCanonicalFile().toURI().toURL());
+        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//            log.error(e.getMessage(), e);
+        }
     }
 
     private static URL[] getBootURLs() {
@@ -84,8 +95,12 @@ public class MixinClassLoader extends URLClassLoader {
                     return super.loadClass(name, resolve);
                 }
             }
+            String className = name.replace('.', '/') + ".class";
+            URL url = this.findResource(className);
 
-            URL url = this.findResource(name.replace('.', '/') + ".class");
+            if (url == null) {
+                url = mixinService.getUrl(className);
+            }
 
             if (url == null) {
                 return super.loadClass(name, resolve);

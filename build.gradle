@@ -1,11 +1,5 @@
-plugins {
-    id 'java'
-}
-
 group 'pf4j-mixin-interaction'
 version '0.1'
-
-sourceCompatibility = 1.8
 
 subprojects {
     apply plugin: 'java'
@@ -20,7 +14,6 @@ subprojects {
             url 'https://stianloader.org/maven/'
         }
     }
-
 
     ext {
         micromixinVersion = '0.6.3-a20240808'
@@ -38,7 +31,7 @@ subprojects {
 ext.pluginsDir = rootProject.buildDir.path + '/plugins'
 
 subprojects { subproject ->
-    if (subproject.name in ['plugin1', 'plugin2']) {
+    if (subproject.name in ['plugin1', 'plugin2','carrierplugin', 'modulationplugin']) {
         dependencies {
             annotationProcessor 'org.pf4j:pf4j:3.5.0'
         }

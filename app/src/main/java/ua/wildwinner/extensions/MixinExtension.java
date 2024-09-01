@@ -1,4 +1,4 @@
-package ua.wildwinner;
+package ua.wildwinner.extensions;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stianloader.micromixin.transform.api.MixinConfig;
+import ua.wildwinner.MixinService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,8 +15,8 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 public abstract class MixinExtension {
-    private static MixinService mixinService;
     private final Logger log = LoggerFactory.getLogger(MixinExtension.class);
+    private static MixinService mixinService;
     private ClassLoader classLoader;
 
     public MixinExtension(ClassLoader classLoader) {
@@ -42,7 +43,7 @@ public abstract class MixinExtension {
         throw new RuntimeException("Mixin config failed");
     }
 
-    protected void registerClassNode(Class<?> clazz) {
+    protected void registerMixinClassNode(Class<?> clazz) {
         String className = clazz.getName().replace('.', '/');
         try (InputStream inputStream = clazz.getClassLoader().getResourceAsStream(className + ".class")) {
             if (inputStream == null) {
