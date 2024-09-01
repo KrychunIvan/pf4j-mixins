@@ -32,8 +32,8 @@ List<Task> getRelease(String... prjNames) {
 
 gradle.projectsEvaluated({
     run.dependsOn += getRelease(
-//            ':plugin1',
-//            ':plugin2',
+            ':plugin1',
+            ':plugin2',
             ':carrierplugin',
             ':modulationplugin',
     )

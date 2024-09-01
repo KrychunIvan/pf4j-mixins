@@ -1,4 +1,4 @@
-package ua.wildwinner;
+package ua.wildwinner.modulation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import ua.wildwinner.DoSomeThingUseful;
 
 @Mixin(value = DoSomeThingUseful.class)
 public class DoSomeThingUsefulMixin extends DoSomeThingUseful {

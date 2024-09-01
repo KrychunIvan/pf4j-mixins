@@ -4,8 +4,6 @@ import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.wildwinner.MixinService;
-import ua.wildwinner.extensions.MixinExtension;
-import ua.wildwinner.extensions.MixinTargetExtension;
 import ua.wildwinner.extensions.SayHello;
 
 import java.lang.invoke.MethodHandle;
@@ -19,14 +17,16 @@ public class ApplicationBootstrap {
     public static void main(String[] args) {
         MixinService mixinService = new MixinService();
         try (MixinClassLoader mixinClassLoader = new MixinClassLoader(mixinService)) {
-            MixinExtension.setMixinService(mixinService);
-            MixinTargetExtension.setMixinService(mixinService);
-            CustomPluginManager.setMixinClassLoader(mixinClassLoader);
-            CustomPluginManager pluginManager = new CustomPluginManager();
+            MixinPlugin.setMixinService(mixinService);
+            MixinPluginManager.setMixinClassLoader(mixinClassLoader);
+            MixinPluginManager pluginManager = new MixinPluginManager();
+            pluginManager.loadPlugins();
+            pluginManager.startPlugins();
+            MixinPlugin.initMixin = false;
+            pluginManager.unloadPlugins();
             pluginManager.loadPlugins();
             pluginManager.startPlugins();
             List<PluginWrapper> startedPlugins = pluginManager.getStartedPlugins();
-            pluginManager.commitMixins();
             for (PluginWrapper plugin : startedPlugins) {
                 String pluginId = plugin.getDescriptor().getPluginId();
                 log.info(String.format("Extensions added by plugin '%s':", pluginId));

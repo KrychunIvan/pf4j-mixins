@@ -12,7 +12,7 @@ dep.remove(file(project(':app').buildDir.absolutePath + "/libs/app.jar"))
 jar {
     manifest {
         attributes 'Manifest-Version': '1.0'
-        attributes 'Plugin-Class': 'ua.wildwinner.ModulationPlugin'
+        attributes 'Plugin-Class': 'ua.wildwinner.modulation.ModulationPlugin'
         attributes 'Plugin-Id': 'modulation-plugin'
         attributes 'Plugin-Dependencies': 'carrier-plugin'
         attributes 'Plugin-Version': '0.0.1'

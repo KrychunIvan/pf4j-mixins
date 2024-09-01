@@ -1,4 +1,4 @@
-package ua.wildwinner;
+package ua.wildwinner.plugin1;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import ua.wildwinner.Target;
 
 @Mixin(value = Target.class)
 public class TargetMixin extends Target {

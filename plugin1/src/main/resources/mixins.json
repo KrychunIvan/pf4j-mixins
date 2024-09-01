@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.7.5",
-  "package": "ua.wildwinner",
+  "package": "ua.wildwinner.plugin1",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
