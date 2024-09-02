@@ -9,7 +9,8 @@ import ua.wildwinner.extensions.SayHello;
 public class CarrierPlugin extends MixinPlugin {
     public CarrierPlugin(PluginWrapper wrapper) {
         super(wrapper);
-        registerSource("ua.wildwinner.DoSomeThingUseful");
+        createInitializer()
+                .registerSource("ua.wildwinner.DoSomeThingUseful");
     }
 
     @Extension

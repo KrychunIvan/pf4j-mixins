@@ -29,15 +29,6 @@ public class MixinClassLoader extends URLClassLoader {
         ClassLoader.registerAsParallelCapable();
     }
 
-    public void addFile(File file) {
-        try {
-            addURL(file.getCanonicalFile().toURI().toURL());
-        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//            log.error(e.getMessage(), e);
-        }
-    }
-
     private static URL[] getBootURLs() {
         ClassLoader parentCL = MixinClassLoader.class.getClassLoader();
         if (parentCL instanceof URLClassLoader) {
@@ -77,6 +68,10 @@ public class MixinClassLoader extends URLClassLoader {
     public MixinClassLoader(MixinService mixinService) {
         super(MixinClassLoader.getBootURLs(), MixinClassLoader.class.getClassLoader());
         this.mixinService = mixinService;
+    }
+
+    public MixinService getMixinService() {
+        return mixinService;
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.stianloader.micromixin.transform.api.supertypes.ClassWrapperPool;
 public class MixinService {
     private final Map<String, ClassNode> nodes = new HashMap<>();
     private MixinTransformer<Void> transformer;
-    private Map<String, Supplier<URL>> map = new HashMap<>();
+    private Map<String, Supplier<URL>> sourceUrls = new HashMap<>();
 
     public MixinService() {
         MapBytecodeProvider<Void> bytecodeProvider = new MapBytecodeProvider<>(nodes);
@@ -34,11 +34,11 @@ public class MixinService {
     }
 
     public void addSourceUrlProvider(String className, Supplier<URL> urlSupplier) {
-        map.put(className, urlSupplier);
+        sourceUrls.put(className, urlSupplier);
     }
 
-    public URL getUrl(String cl) {
-        Supplier<URL> urlSupplier = map.get(cl);
+    public URL getUrl(String className) {
+        Supplier<URL> urlSupplier = sourceUrls.get(className);
         return urlSupplier == null ? null : urlSupplier.get();
     }
 }

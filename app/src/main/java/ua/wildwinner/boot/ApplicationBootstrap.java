@@ -15,15 +15,8 @@ public class ApplicationBootstrap {
     private static final Logger log = LoggerFactory.getLogger(ApplicationBootstrap.class);
 
     public static void main(String[] args) {
-        MixinService mixinService = new MixinService();
-        try (MixinClassLoader mixinClassLoader = new MixinClassLoader(mixinService)) {
-            MixinPlugin.setMixinService(mixinService);
-            MixinPluginManager.setMixinClassLoader(mixinClassLoader);
-            MixinPluginManager pluginManager = new MixinPluginManager();
-            pluginManager.loadPlugins();
-            pluginManager.startPlugins();
-            MixinPlugin.initMixin = false;
-            pluginManager.unloadPlugins();
+        try (MixinClassLoader mixinClassLoader = new MixinClassLoader(new MixinService())) {
+            MixinPluginManager pluginManager = new MixinPluginManager(mixinClassLoader);
             pluginManager.loadPlugins();
             pluginManager.startPlugins();
             List<PluginWrapper> startedPlugins = pluginManager.getStartedPlugins();
