@@ -10,11 +10,7 @@ import ua.wildwinner.DoSomeThingUseful;
 
 @Mixin(value = DoSomeThingUseful.class)
 public class DoSomeThingUsefulMixin extends DoSomeThingUseful {
-    private static Logger log;
-
-    public DoSomeThingUsefulMixin() {
-        log = LoggerFactory.getLogger(DoSomeThingUsefulMixin.class);
-    }
+    private static Logger log = LoggerFactory.getLogger(DoSomeThingUsefulMixin.class);
 
     @Inject(method = "doWork", at = @At("HEAD"))
     private void injected(CallbackInfo ci) {

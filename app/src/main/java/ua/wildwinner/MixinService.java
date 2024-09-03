@@ -12,8 +12,8 @@ import org.stianloader.micromixin.transform.api.supertypes.ClassWrapperPool;
 
 public class MixinService {
     private final Map<String, ClassNode> nodes = new HashMap<>();
-    private MixinTransformer<Void> transformer;
     private Map<String, Supplier<URL>> sourceUrls = new HashMap<>();
+    private MixinTransformer<Void> transformer;
 
     public MixinService() {
         MapBytecodeProvider<Void> bytecodeProvider = new MapBytecodeProvider<>(nodes);

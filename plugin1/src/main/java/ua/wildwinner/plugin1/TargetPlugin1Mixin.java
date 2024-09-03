@@ -1,4 +1,4 @@
-package ua.wildwinner.plugin2;
+package ua.wildwinner.plugin1;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,18 +10,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ua.wildwinner.Target;
 
 @Mixin(value = Target.class)
-public class TargetMixin extends Target {
-    private static Logger log;
+public class TargetPlugin1Mixin extends Target {
+    private static Logger log = LoggerFactory.getLogger(TargetPlugin1Mixin.class);
     @Shadow
     private String hi;
 
-    public TargetMixin() {
-        log = LoggerFactory.getLogger(TargetMixin.class);
-    }
-
     @Inject(method = "hi", at = @At("HEAD"))
     private void injected(CallbackInfo ci) {
-        hi += "+shadow hi from plugin2";
-        log.info("Hi from Mixin plugin2");
+        hi += "+shadow hi plugin";
+        if (log == null) {
+            throw new RuntimeException("log is null");
+        }
+        log.info("Hi from Mixin");
     }
 }

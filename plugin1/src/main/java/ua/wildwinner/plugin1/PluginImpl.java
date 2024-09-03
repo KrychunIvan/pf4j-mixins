@@ -10,7 +10,7 @@ public class PluginImpl extends MixinPlugin {
     public PluginImpl(PluginWrapper wrapper) {
         super(wrapper);
         createInitializer()
-                .registerMixinClassNode("ua.wildwinner.plugin1.TargetMixin")
+                .registerMixinClassNode("ua.wildwinner.plugin1.TargetPlugin1Mixin")
                 .registerConfig();
     }
 
