@@ -3,6 +3,12 @@ plugins {
     id 'application'
 }
 
+repositories {
+    flatDir {
+        dirs "$project.projectDir/lib"
+    }
+}
+
 compileJava {
     options.encoding = "UTF-8"
     outputs.upToDateWhen { false }
@@ -17,10 +23,25 @@ dependencies {
     runtime "org.stianloader:micromixin-runtime:${micromixinVersion}"
     compile "org.stianloader:micromixin-transformer:${micromixinVersion}"
     compile "org.stianloader:micromixin-annotations:${micromixinVersion}"
+
+    runtimeOnly name: 'generated-classes'
 }
+
+task createGeneratedJar(type: Jar) {
+    from fileTree(dir: 'build/generated-classes', include: '**/*.class')
+    archiveBaseName.set('generated-classes')
+    archiveVersion.set('')
+    destinationDirectory.set(file('lib'))
+}
+
+compileJava.dependsOn createGeneratedJar
 
 //Application
 mainClassName = "ua.wildwinner.boot.ApplicationBootstrap"
+
+run {
+    jvmArgs("-Dmixin.debug.export=true")
+}
 
 List<Task> getRelease(String... prjNames) {
     List temp = new ArrayList()
@@ -33,7 +54,7 @@ List<Task> getRelease(String... prjNames) {
 gradle.projectsEvaluated({
     run.dependsOn += getRelease(
             ':plugin1',
-            ':plugin2',
+//            ':plugin2',
             ':carrierplugin',
             ':modulationplugin',
     )

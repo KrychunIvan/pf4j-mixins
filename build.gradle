@@ -16,7 +16,7 @@ subprojects {
     }
 
     ext {
-        micromixinVersion = '0.6.3-a20240808'
+        micromixinVersion = '0.6.4-a20240903'
     }
 
     sourceCompatibility = 1.8

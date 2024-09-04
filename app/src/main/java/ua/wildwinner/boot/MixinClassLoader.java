@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.ClassNode;
 import ua.wildwinner.MixinService;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -21,6 +22,7 @@ public class MixinClassLoader extends URLClassLoader {
         "org.objectweb.asm.",
         "org.json.",
         "org.stianloader.micromixin.transform.",
+        "org.spongepowered.",
         "org.slf4j.",
         "org.pf4j."
     };
@@ -116,6 +118,7 @@ public class MixinClassLoader extends URLClassLoader {
                 };
                 node.accept(writer);
                 byte[] data = writer.toByteArray();
+                saveClassToFile(name, data);
                 Class<?> defined = this.defineClass(name, data, 0, data.length);
                 if (resolve) {
                     this.resolveClass(defined);
@@ -124,6 +127,18 @@ public class MixinClassLoader extends URLClassLoader {
             } catch (Exception e) {
                 throw new ClassNotFoundException("Not found: " + name, e);
             }
+        }
+    }
+
+    private void saveClassToFile(String name, byte[] data) {
+        try {
+            File outputFile = new File("build/generated-classes/" + name.replace('.', '/') + ".class");
+            outputFile.getParentFile().mkdirs();
+            try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                fos.write(data);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
