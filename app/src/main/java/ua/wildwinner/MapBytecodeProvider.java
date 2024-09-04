@@ -15,6 +15,7 @@ public class MapBytecodeProvider<M> extends ASMClassWrapperProvider implements B
         this.nodes = nodes;
     }
 
+    @NotNull
     @Override
     public ClassNode getClassNode(M modularityAttachment, @NotNull String internalName) throws ClassNotFoundException {
         ClassNode node = nodes.get(internalName);

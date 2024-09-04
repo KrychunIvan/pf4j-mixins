@@ -12,20 +12,23 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Enumeration;
 
 public class MixinClassLoader extends URLClassLoader {
 
     private static final String[] PROHIBITED_PREFIXES = {
-        "ua.wildwinner.boot.",
-        "ua.wildwinner.MixinService",
-        "ua.wildwinner.extensions.",
-        "org.objectweb.asm.",
-        "org.json.",
-        "org.stianloader.micromixin.transform.",
-        "org.spongepowered.",
-        "org.slf4j.",
-        "org.pf4j."
+            "ua.wildwinner.boot.",
+            "ua.wildwinner.MixinService",
+            "ua.wildwinner.extensions.",
+            "org.objectweb.asm.",
+            "org.json.",
+            "org.stianloader.micromixin.transform.",
+            "org.spongepowered.",
+            "org.slf4j.",
+            "org.pf4j."
     };
+
+    private static final boolean development = "true".equals(System.getProperty("pf4j.mixins.dev"));
 
     static {
         ClassLoader.registerAsParallelCapable();
@@ -63,8 +66,8 @@ public class MixinClassLoader extends URLClassLoader {
             return urls;
         }
     }
-    private final ClassLoader asmClassloader = new URLClassLoader(new URL[0], this);
 
+    private final ClassLoader asmClassloader = new URLClassLoader(new URL[0], this);
     private final MixinService mixinService;
 
     public MixinClassLoader(MixinService mixinService) {
@@ -77,9 +80,30 @@ public class MixinClassLoader extends URLClassLoader {
     }
 
     @Override
+    public URL findResource(String name) {
+        if (!development) {
+            return super.findResource(name);
+        }
+        URL url = null;
+        try {
+            Enumeration<URL> resources = findResources(name);
+            while (resources.hasMoreElements()) {
+                URL currentUrl = resources.nextElement();
+                if (!currentUrl.getFile().contains("generated-classes.jar")) {
+                    url = currentUrl;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+
+    @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        synchronized (this.getClassLoadingLock(name)) {
-            Class<?> alreadyLoaded = this.findLoadedClass(name);
+        synchronized (getClassLoadingLock(name)) {
+            Class<?> alreadyLoaded = findLoadedClass(name);
             if (alreadyLoaded != null) {
                 if (resolve) {
                     this.resolveClass(alreadyLoaded);
@@ -93,7 +117,7 @@ public class MixinClassLoader extends URLClassLoader {
                 }
             }
             String className = name.replace('.', '/') + ".class";
-            URL url = this.findResource(className);
+            URL url = findResource(className);
 
             if (url == null) {
                 url = mixinService.getUrl(className);
@@ -119,9 +143,9 @@ public class MixinClassLoader extends URLClassLoader {
                 node.accept(writer);
                 byte[] data = writer.toByteArray();
                 saveClassToFile(name, data);
-                Class<?> defined = this.defineClass(name, data, 0, data.length);
+                Class<?> defined = defineClass(name, data, 0, data.length);
                 if (resolve) {
-                    this.resolveClass(defined);
+                    resolveClass(defined);
                 }
                 return defined;
             } catch (Exception e) {
@@ -131,6 +155,9 @@ public class MixinClassLoader extends URLClassLoader {
     }
 
     private void saveClassToFile(String name, byte[] data) {
+        if (!development) {
+            return;
+        }
         try {
             File outputFile = new File("build/generated-classes/" + name.replace('.', '/') + ".class");
             outputFile.getParentFile().mkdirs();

@@ -9,9 +9,6 @@ import ua.wildwinner.extensions.SayHello;
 public class PluginImpl extends MixinPlugin {
     public PluginImpl(PluginWrapper wrapper) {
         super(wrapper);
-        createInitializer()
-                .registerMixinClassNode("ua.wildwinner.plugin2.TargetPlugin2Mixin")
-                .registerConfig();
     }
 
     @Override

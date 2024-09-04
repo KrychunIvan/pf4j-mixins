@@ -40,7 +40,7 @@ compileJava.dependsOn createGeneratedJar
 mainClassName = "ua.wildwinner.boot.ApplicationBootstrap"
 
 run {
-    jvmArgs("-Dmixin.debug.export=true")
+    jvmArgs("-Dpf4j.mixins.dev=true")
 }
 
 List<Task> getRelease(String... prjNames) {
@@ -54,7 +54,7 @@ List<Task> getRelease(String... prjNames) {
 gradle.projectsEvaluated({
     run.dependsOn += getRelease(
             ':plugin1',
-//            ':plugin2',
+            ':plugin2',
             ':carrierplugin',
             ':modulationplugin',
     )

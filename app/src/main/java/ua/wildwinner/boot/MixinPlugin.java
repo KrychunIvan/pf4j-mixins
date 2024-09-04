@@ -17,39 +17,36 @@ import java.io.InputStreamReader;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class MixinPlugin extends Plugin {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private URLClassLoader classLoader;
     private MixinInitializer mixinInitializer;
 
     public MixinPlugin(PluginWrapper wrapper) {
         super(wrapper);
-        this.classLoader = (URLClassLoader) this.getClass().getClassLoader();
+        mixinInitializer = new MixinInitializer((URLClassLoader) this.getClass().getClassLoader());
+        mixinInitializer.registerConfig();
     }
 
-    protected final MixinInitializer createInitializer() {
-        if (mixinInitializer == null) {
-            return mixinInitializer = new MixinInitializer();
-        }
-        throw new IllegalStateException("Double call createInitializer");
-    }
-
-    protected class MixinInitializer {
+    private class MixinInitializer {
         private final List<Consumer<MixinService>> initMixins = new ArrayList<>();
+        private URLClassLoader classLoader;
 
-        private MixinInitializer() {}
-
-        public MixinInitializer registerSource(String name) {
-            String className = name.replace('.', '/') + ".class";
-            initMixins.add(mixinService -> mixinService.addSourceUrlProvider(className, () -> classLoader.findResource(className)));
-            return this;
+        private MixinInitializer(URLClassLoader classLoader) {
+            this.classLoader = classLoader;
         }
 
-        public MixinInitializer registerMixinClassNode(String name) {
+        void registerSource(String name) {
+            String className = name.replace('.', '/') + ".class";
+            initMixins.add(mixinService -> mixinService.addSourceUrlProvider(className,
+                    () -> classLoader.findResource(className)));
+        }
+
+        void registerMixinClassNode(String name) {
             String className = name.replace('.', '/');
             try (InputStream inputStream = classLoader.getResourceAsStream(className + ".class")) {
                 if (inputStream == null) {
@@ -59,22 +56,36 @@ public class MixinPlugin extends Plugin {
                 ClassNode classNode = new ClassNode(Opcodes.ASM9);
                 classReader.accept(classNode, 0);
                 initMixins.add(mixinService -> mixinService.addNode(className, classNode));
-                return this;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        public void registerConfig() {
-            try {
-                MixinConfig mixinConfig = MixinPlugin.this.configureMixins();
-                initMixins.add(mixinService -> mixinService.registerMixin(mixinConfig));
-            } catch (IOException e) {
-                log.error("Load mixin config error", e);
-                throw new RuntimeException("Mixin config failed", e);
-            } catch (MixinConfig.InvalidMixinConfigException e) {
-                log.error("Parse mixin config error", e);
-                throw new RuntimeException("Mixin config failed", e);
+        void registerConfig() {
+            List<MixinConfig> mixinsConfigs = new ArrayList<>();
+            mixinsConfigs.add(parseConfig(classLoader, "mixins.json"));
+            mixinsConfigs.add(parseConfig(classLoader, "mixins-targets.json"));
+            mixinsConfigs.removeIf(Objects::isNull);
+
+            if (mixinsConfigs.size() == 2) {
+                if (mixinsConfigs.get(0).setSourceFile == mixinsConfigs.get(1).setSourceFile) {
+                    throw new IllegalStateException("Both Mixin configurations have the same type. One should be a Mixin, and the other a target.");
+                }
+            }
+
+            for (MixinConfig mixinConfig : mixinsConfigs) {
+                mixinConfig.mixins.stream()
+                        .map(className -> mixinConfig.mixinPackage + "." + className)
+                        .forEach(fullClassName -> {
+                            if (mixinConfig.setSourceFile) {
+                                registerSource(fullClassName);
+                            } else {
+                                registerMixinClassNode(fullClassName);
+                            }
+                        });
+                if (!mixinConfig.setSourceFile) {
+                    initMixins.add(mixinService -> mixinService.registerMixin(mixinConfig));
+                }
             }
         }
 
@@ -83,14 +94,24 @@ public class MixinPlugin extends Plugin {
         }
     }
 
-    protected MixinConfig configureMixins() throws IOException, MixinConfig.InvalidMixinConfigException {
-        return MixinConfig.fromString(readJsonFromResource("mixins.json"));
+    private MixinConfig parseConfig(URLClassLoader classLoader, String fileName) {
+        try {
+            String readMixinsJson = readJsonFromResource(classLoader, fileName);
+            if (readMixinsJson != null) {
+                log.debug("Found mixins config `{}`", fileName);
+                return MixinConfig.fromString(readMixinsJson);
+            }
+        } catch (MixinConfig.InvalidMixinConfigException | IOException e) {
+            log.error("Parse mixin config error", e);
+            throw new RuntimeException("Mixin config failed", e);
+        }
+        return null;
     }
 
-    protected String readJsonFromResource(String resourcePath) throws IOException {
+    protected String readJsonFromResource(ClassLoader classLoader, String resourcePath) throws IOException {
         try (InputStream inputStream = classLoader.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw new IOException("Resource not found: " + resourcePath);
+                return null;
             }
             try (InputStreamReader isr = new InputStreamReader(inputStream);
                  BufferedReader reader = new BufferedReader(isr)) {
