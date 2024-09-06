@@ -43,7 +43,7 @@ public class MixinPlugin extends Plugin {
         void registerSource(String name) {
             String className = name.replace('.', '/') + ".class";
             initMixins.add(mixinService -> mixinService.addSourceUrlProvider(className,
-                    () -> classLoader.findResource(className)));
+                    () -> classLoader.getResource(className)));
         }
 
         void registerMixinClassNode(String name) {

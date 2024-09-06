@@ -5,14 +5,10 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import ua.wildwinner.MixinService;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Enumeration;
 
 public class MixinClassLoader extends URLClassLoader {
 
@@ -80,27 +76,6 @@ public class MixinClassLoader extends URLClassLoader {
     }
 
     @Override
-    public URL findResource(String name) {
-        if (!development) {
-            return super.findResource(name);
-        }
-        URL url = null;
-        try {
-            Enumeration<URL> resources = findResources(name);
-            while (resources.hasMoreElements()) {
-                URL currentUrl = resources.nextElement();
-                if (!currentUrl.getFile().contains("generated-classes.jar")) {
-                    url = currentUrl;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return url;
-    }
-
-    @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (getClassLoadingLock(name)) {
             Class<?> alreadyLoaded = findLoadedClass(name);
@@ -148,24 +123,22 @@ public class MixinClassLoader extends URLClassLoader {
                     resolveClass(defined);
                 }
                 return defined;
+            } catch (IOException e) {
+                throw new RuntimeException("File process error: " + name, e);
             } catch (Exception e) {
                 throw new ClassNotFoundException("Not found: " + name, e);
             }
         }
     }
 
-    private void saveClassToFile(String name, byte[] data) {
+    private void saveClassToFile(String name, byte[] data) throws IOException {
         if (!development) {
             return;
         }
-        try {
-            File outputFile = new File("build/generated-classes/" + name.replace('.', '/') + ".class");
-            outputFile.getParentFile().mkdirs();
-            try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-                fos.write(data);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        File outputFile = new File("build/generated-classes/" + name.replace('.', '/') + ".class");
+        outputFile.getParentFile().mkdirs();
+        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+            fos.write(data);
         }
     }
 }

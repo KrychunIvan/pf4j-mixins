@@ -24,7 +24,7 @@ dependencies {
     compile "org.stianloader:micromixin-transformer:${micromixinVersion}"
     compile "org.stianloader:micromixin-annotations:${micromixinVersion}"
 
-    runtimeOnly name: 'generated-classes'
+    compileOnly name: 'generated-classes'
 }
 
 task createGeneratedJar(type: Jar) {
