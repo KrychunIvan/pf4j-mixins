@@ -52,9 +52,17 @@ public class MixinPlugin extends Plugin {
                 if (inputStream == null) {
                     throw new RuntimeException("Class not found: " + className);
                 }
+                registerSource(className + ".class");
                 ClassReader classReader = new ClassReader(inputStream);
                 ClassNode classNode = new ClassNode(Opcodes.ASM9);
                 classReader.accept(classNode, 0);
+                DependencyCollector dependencyCollector = new DependencyCollector(className.substring(0, className.lastIndexOf('/')));
+                classReader.accept(dependencyCollector, 0);
+                dependencyCollector.getDependencies().forEach(dependency -> {
+                    String depClassName = dependency + ".class";
+                    initMixins.add(mixinService -> mixinService.addSourceUrlProvider(depClassName,
+                            () -> classLoader.getResource(depClassName)));
+                });
                 initMixins.add(mixinService -> mixinService.addNode(className, classNode));
             } catch (IOException e) {
                 throw new RuntimeException(e);

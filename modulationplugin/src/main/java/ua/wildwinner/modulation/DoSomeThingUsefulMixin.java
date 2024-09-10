@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ua.wildwinner.DoSomeThingUseful;
+import ua.wildwinner.modulation.internal.Outer;
 
 @Mixin(value = DoSomeThingUseful.class)
 public class DoSomeThingUsefulMixin extends DoSomeThingUseful {
@@ -15,5 +16,17 @@ public class DoSomeThingUsefulMixin extends DoSomeThingUseful {
     @Inject(method = "doWork", at = @At("HEAD"))
     private void injected(CallbackInfo ci) {
         log.info("Hi from DoSomeThingUsefulMixin");
+        new Outer().outerCall();
+        hiCall();
+    }
+
+    private static void hiCall() {
+        new Inner().hi();
+    }
+
+    public static class Inner {
+        public void hi() {
+            log.info("Inner hi");
+        }
     }
 }
